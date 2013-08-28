@@ -122,7 +122,7 @@ function getDoc(reqUrl, id, cb) {
 	}).end();
 }
 
-function serialize = function(x) {
+function serialize(x) {
 	for (i in x) {
 		if (i[0] != '_') {
 			if (typeof x[i] == 'function') {
@@ -137,7 +137,7 @@ function serialize = function(x) {
 }
 
 
-function pushDoc(reqUrl, doc, cb) {s
+function pushDoc(reqUrl, doc, cb) {
 
 	//prepare for JSON.stringify 
 	serialize(doc);
