@@ -78,6 +78,7 @@ module.exports = function(cb) {
 			cb(err);
 			return;
 		}
+		ddoc.views.events.map = data;
 		//doc is ready
 		cb(null, ddoc);
 	});
