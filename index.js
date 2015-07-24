@@ -21,13 +21,13 @@ function buildDoc(dir, cb) {
 
 function push(docPath, couchUrl, cb) {
 	var dir = abspath(docPath);
-	buildDoc(dir, function(err, doc) {
+	buildDoc(dir, function (err, doc) {
 		if (err) {
 			cb(err);
 			return;
 		}
 		var reqUrl = url.parse(couchUrl);
-		getDoc(reqUrl, doc._id, function(err, docDb) {
+		getDoc(reqUrl, doc._id, function (err, docDb) {
 			if (err) {
 				cb(err);
 				return;
@@ -41,7 +41,7 @@ function push(docPath, couchUrl, cb) {
 			var totalFiles = 1;
 
 			function directoryLookup(dir, prefix) {
-				fs.readdir(dir, function(err, files) {
+				fs.readdir(dir, function (err, files) {
 					if (err) {
 						//no files
 						pushDoc(reqUrl, doc, cb);
@@ -49,9 +49,9 @@ function push(docPath, couchUrl, cb) {
 					}
 					totalFiles += files.length - 1;
 					for (i in files) {
-						(function(f) {
+						(function (f) {
 							var filePath = dir + '/' + f;
-							fs.stat(filePath, function(err, stats) {
+							fs.stat(filePath, function (err, stats) {
 								if (err) {
 									cb(err);
 									return;
@@ -59,7 +59,7 @@ function push(docPath, couchUrl, cb) {
 								if (stats.isDirectory()) {
 									directoryLookup(filePath, (prefix ? prefix + f : f) + '/');
 								} else {
-									fs.readFile(filePath, function(err, data) {
+									fs.readFile(filePath, function (err, data) {
 										if (err) {
 											cb(err);
 											return;
@@ -99,13 +99,16 @@ function getDoc(reqUrl, id, cb) {
 	};
 
 	//GET
-	http.request(hash, function(response) {
+	http.request(hash, function (response) {
 		response.setEncoding('utf8');
 		var body = '';
-		response.on('readable', function() {
-			body += response.read();
+		response.on('readable', function () {
+			var chunk = response.read();
+			if (chunk) {
+				body += chunk;
+			}
 		});
-		response.on('end', function() {
+		response.on('end', function () {
 			if (response.statusCode === 404) {
 				cb(null, null);
 				return;
@@ -117,7 +120,7 @@ function getDoc(reqUrl, id, cb) {
 			}
 			cb(null, obj);
 		});
-	}).on('error', function(err) {
+	}).on('error', function (err) {
 		cb(err);
 	}).end();
 }
@@ -139,7 +142,7 @@ function serialize(x) {
 
 function pushDoc(reqUrl, doc, cb) {
 
-	//prepare for JSON.stringify 
+	//prepare for JSON.stringify
 	serialize(doc);
 
 	var content = JSON.stringify(doc);
@@ -157,14 +160,17 @@ function pushDoc(reqUrl, doc, cb) {
 		'content-length': Buffer.byteLength(content)
 	}
 
-	//PUT 
-	http.request(hash, function(response) {
+	//PUT
+	http.request(hash, function (response) {
 		response.setEncoding('utf8');
 		var body = '';
-		response.on('readable', function() {
-			body += response.read();
+		response.on('readable', function () {
+			var chunk = response.read();
+			if (chunk) {
+				body += chunk;
+			}
 		});
-		response.on('end', function() {
+		response.on('end', function () {
 			var obj = JSON.parse(body);
 			if (response.statusCode !== 201) {
 				cb(obj);
@@ -172,7 +178,7 @@ function pushDoc(reqUrl, doc, cb) {
 			}
 			cb(null, obj);
 		});
-	}).on('error', function(err) {
+	}).on('error', function (err) {
 		cb(err);
 	}).end(content);
 }
